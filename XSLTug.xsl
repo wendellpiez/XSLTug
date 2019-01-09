@@ -148,7 +148,14 @@
         <xsl:variable name="invocation" select="key('argument-by-signature',t:signature(.),$processtree)"/>
             <xsl:if test="exists($invocation)">
                 <xsl:apply-templates/>
-        
+                <xsl:variable name="config" select="."/>
+                <xsl:for-each select="$invocation">
+                    <xsl:if test="exists(*) and
+                        not(*/local-name() = $config//a:*/local-name() )">
+                        <xsl:text expand-text="true">Not finding pattern for '{ */ancestor-or-self::*/name() }'&#xA;</xsl:text>
+                    </xsl:if>
+                    
+                </xsl:for-each>
                 <!--<xsl:variable name="nextdown" select="distinct-values( (descendant::a:* except descendant::a:*//a:*)/local-name() )"/>-->
                 <!--<xsl:if test="not($invocation/a:*/local-name() = $nextdown )">
                     <xsl:text expand-text="true">Not finding pattern for '{ $invocation/a:*/ancestor-or-self::*/name() }'&#xA;</xsl:text>
@@ -160,7 +167,7 @@
        
 <!-- Top level element of an argument configuration -->
    <xsl:template match="tug">
-       <xsl:if expand-text="true" test="empty(ancestor::*) and not(a:*/local-name() = $processtree/a:*/local-name() )">Warning: no spec for { $processtree/*/local-name() }&#xA;</xsl:if>
+       <xsl:if expand-text="true" test="empty(ancestor::*) and not(a:*/local-name() = $processtree/a:*/local-name() )">Warning: no spec for tugging '{ $processtree/*/local-name() }'&#xA;</xsl:if>
        <xsl:apply-templates/>
    </xsl:template>
     
