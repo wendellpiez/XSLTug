@@ -7,5 +7,5 @@ ARGS="$*"
 SAFEARGS=${ARGS//[ ]/&}
 RUNTUG="java -jar $SAXON -xsl:$TUGXSLT -it:go wd=$(pwd) argstring=$SAFEARGS"
 
-echo $RUNTUG
+# echo $RUNTUG
 $RUNTUG

@@ -7,8 +7,13 @@
     
     <xsl:mode on-no-match="shallow-copy"/>
     
-    <!--<xsl:template match="*[.='transform-1.xsl']">
-        <xsl:copy>transform-2.xsl</xsl:copy>
+    <!--<xsl:template match="/">
+        <xsl:comment expand-text="true"> transformation 1 sees { if (count(//*)=1) then 'element' else 'elements' }</xsl:comment>
+        <xsl:apply-templates/>
     </xsl:template>-->
+    
+    <xsl:template match="*[.='transform-1.xsl']">
+        <xsl:copy copy-namespaces="no">transform-2.xsl</xsl:copy>
+    </xsl:template>
     
 </xsl:stylesheet>
