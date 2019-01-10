@@ -16,11 +16,21 @@ If you deploy such pipelines to be used by team as "appliances", you might be pa
 
 ## XSLT pipelines as black boxes
 
+While it is useful to be able to write XSLT, it is also useful to be able to run it even if you don't trust yourself to write it.
+
 ## Extensibility / Learnability
+
+While lightweight, this is meant to be very flexible and extensible. Also, because it will be set down and taken up at inconsistent intervals, it must be learnable and traceable.
 
 ## Security
 
+Everything is encapsulated in a single runtime call. While XSLTug may write files to the system (as designed), it won't create artifacts and doesn't depend on network or server.
+
 ## Limitations
+
+Without support (for example) for EXSLT, we can't quite provide full services over the directory structure.
+
+This means that some kinds of batch processing aren't readily provided for. Expect things to work best one-to-one or one-to-many.
 
 # To use:
 
@@ -44,4 +54,8 @@ Edit the scripts to replace the developer's paths with your own.
 
 ### Command syntax
  
--- Working on it --
+`./tug.sh` or just (if aliased) `tug`
+
+`tug -help` gives basic help, including the configured command tree
+`tug test` invoked a simple pipeline to test whether pipelining transformations works properly
+
