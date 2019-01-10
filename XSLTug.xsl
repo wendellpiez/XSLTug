@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    exclude-result-prefixes="xs a"
+    exclude-result-prefixes="#all"
     xmlns="http://github.com/wendellpiez/XSLTug"
     xpath-default-namespace="http://github.com/wendellpiez/XSLTug"
     
     xmlns:t="http://github.com/wendellpiez/XSLTug"
-    xmlns:a="http://github.com/wendellpiez/XSLTug/arguments"
+    xmlns:c="http://github.com/wendellpiez/XSLTug/configuration"
     version="3.0">
     
     <xsl:output indent="yes" omit-xml-declaration="yes"/>
@@ -17,7 +17,7 @@
     <xsl:param name="argstring" as="xs:string"/>
     
 <!-- All args tokenizes around spaces and punctuation -->
-    <xsl:variable name="all-args" select="tokenize($argstring,'(&amp;|\s)+')"/>
+    <xsl:variable name="all-args" select="tokenize($argstring,'\p{P}*(&amp;|\s)+')"/>
     
 <!-- $wd is the home (working) directory -->
     <xsl:param name="wd"    as="xs:string"/>
@@ -76,7 +76,7 @@
     <xsl:template mode="processtree" match="*[@v castable as xs:anyURI]
         [matches(@v,'\.[a-z]+$')]" priority="2">
         <xsl:variable name="href" select="resolve-uri(@v,$request/request/base_dir)"/>
-        <file href="{ $href }" xmlns="http://github.com/wendellpiez/XSLTug/arguments">
+        <file href="{ $href }" xmlns="http://github.com/wendellpiez/XSLTug/configuration">
             <xsl:if test="doc-available($href)">
             <xsl:for-each select="document($href)/*">
                 <xsl:attribute name="root"><xsl:value-of select="local-name()"/></xsl:attribute>
@@ -90,13 +90,13 @@
     </xsl:template>
     
     <xsl:template mode="processtree" match="*[matches(@v,'^\i\c*$')]">
-        <xsl:element name="{@v}" namespace="http://github.com/wendellpiez/XSLTug/arguments">
+        <xsl:element name="{@v}" namespace="http://github.com/wendellpiez/XSLTug/configuration">
             <xsl:apply-templates mode="processtree"/>
         </xsl:element>
     </xsl:template>
     
     <xsl:template mode="processtree" match="*[@v=('-h','--help')]">
-        <help xmlns="http://github.com/wendellpiez/XSLTug/arguments">
+        <help xmlns="http://github.com/wendellpiez/XSLTug/configuration">
             <xsl:apply-templates mode="processtree"/>
         </help>
     </xsl:template>
@@ -129,7 +129,7 @@
     
 <!--<!-\- Matching any argument string in default traversal, we jump to the configuration
       at the same point. -\->
-    <xsl:template match="a:*">
+    <xsl:template match="c:*">
         <xsl:apply-templates mode="execute" select="key('argument-by-signature',t:signature(.),$go)">
             <xsl:with-param name="caller" tunnel="yes" select="."/>
         </xsl:apply-templates>
@@ -144,51 +144,41 @@
     We also use the opportunity to test and see what isn't caught.
     
     -->
-    <xsl:template match="a:*">
+    
+    <!-- when asked to mock up, skip the exception handling -->
+    <xsl:template match="c:mockup">
+        <xsl:variable name="invocation" select="key('argument-by-signature',t:signature(.),$processtree)"/>
+        <xsl:if test="exists($invocation)">
+            <xsl:apply-templates/>
+        </xsl:if>
+    </xsl:template>
+    
+    <xsl:template match="c:*">
         <xsl:variable name="invocation" select="key('argument-by-signature',t:signature(.),$processtree)"/>
             <xsl:if test="exists($invocation)">
                 <xsl:apply-templates/>
                 <xsl:variable name="config" select="."/>
                 <xsl:for-each select="$invocation">
                     <xsl:if test="exists(*) and
-                        not(*/local-name() = $config//a:*/local-name() )">
-                        <xsl:text expand-text="true">Not finding pattern for '{ */ancestor-or-self::*/name() }'&#xA;</xsl:text>
+                        not(*/local-name() = $config//c:*/local-name() )">
+                        <xsl:text expand-text="true">&#xA;XSLTug WARNING: Not finding pattern for '{ */ancestor-or-self::*/name() }'&#xA;&#x200b;</xsl:text>
                     </xsl:if>
-                    
                 </xsl:for-each>
-                <!--<xsl:variable name="nextdown" select="distinct-values( (descendant::a:* except descendant::a:*//a:*)/local-name() )"/>-->
-                <!--<xsl:if test="not($invocation/a:*/local-name() = $nextdown )">
-                    <xsl:text expand-text="true">Not finding pattern for '{ $invocation/a:*/ancestor-or-self::*/name() }'&#xA;</xsl:text>
+                <!--<xsl:variable name="nextdown" select="distinct-values( (descendant::c:* except descendant::c:*//c:*)/local-name() )"/>-->
+                <!--<xsl:if test="not($invocation/c:*/local-name() = $nextdown )">
+                    <xsl:text expand-text="true">Not finding pattern for '{ $invocation/c:*/ancestor-or-self::*/name() }'&#xA;&#x200b;</xsl:text>
                     <xsl:text expand-text="true">Try{ if (count($nextdown) gt 1) then ' (one of)' else ' ' }{ string-join(
-                        ($nextdown ! '''' ||  string-join(($invocation/ancestor-or-self::a:*/local-name(),.),' ') || ''''),', ') }&#xA;</xsl:text>
+                        ($nextdown ! '''' ||  string-join(($invocation/ancestor-or-self::c:*/local-name(),.),' ') || ''''),', ') }&#xA;&#x200b;</xsl:text>
             </xsl:if>-->
             </xsl:if>        
     </xsl:template>
        
 <!-- Top level element of an argument configuration -->
    <xsl:template match="tug">
-       <xsl:if expand-text="true" test="empty(ancestor::*) and not(a:*/local-name() = $processtree/a:*/local-name() )">Warning: no spec for tugging '{ $processtree/*/local-name() }'&#xA;</xsl:if>
+       <xsl:if expand-text="true" test="empty(ancestor::*) and not(c:*/local-name() = $processtree/c:*/local-name() )">&#xA;XSLTug WARNING: No configuration for '{ $processtree/*/local-name() }'&#xA;&#x200b;</xsl:if>
        <xsl:apply-templates/>
    </xsl:template>
     
-    
-    
-    <!--<xsl:variable name="dummy-sequence">
-        <sequence>
-            <transform>transform-1.xsl</transform>
-            <transform>transform-2.xsl</transform>
-        </sequence>
-    </xsl:variable>
-    
-    <xsl:variable name="xsweet-sequence">
-        <sequence>
-            <transform>docx-html-extract.xsl</transform>
-            <transform>handle-notes.xsl</transform>
-            <transform>scrub.xsl</transform>
-            <transform>join-elements.xsl</transform>
-            <transform>collapse-paragraphs.xsl</transform>
-        </sequence>
-    </xsl:variable>--> 
     
     <xsl:template match="apply-sequence">
        
@@ -237,10 +227,16 @@
         <xsl:apply-templates mode="acquire"/>
     </xsl:template>
     
+    <xsl:template match="trace">
+        
+        <xsl:apply-templates select="$go/t:tug" mode="spill"/>
+        <xsl:text>&#xA;&#x200b;</xsl:text>
+    </xsl:template>
+    
     <xsl:mode name="acquire" on-no-match="shallow-copy"/>
     
     <xsl:template mode="acquire" match="file[@href='file-href']">
-        <xsl:variable name="proxy-signature" select="t:signature(parent::a:file)"/>
+        <xsl:variable name="proxy-signature" select="t:signature(parent::c:file)"/>
         <xsl:variable name="path" select="key('argument-by-signature',$proxy-signature,$processtree)/@href"/>
         <!-- could have more robust exception trapping here -->
         <xsl:sequence select="document($path)"/>
@@ -258,13 +254,25 @@
         </xsl:element>
     </xsl:template>
     
-    <xsl:variable name="go" xmlns="http://github.com/wendellpiez/XSLTug/arguments"
+    <xsl:template match="xsl:* | text()" mode="spill"/>
+    
+    <xsl:template match="t:*" mode="spill">
+        <xsl:apply-templates mode="#current"/>
+    </xsl:template>
+    
+    <xsl:template match="c:*" mode="spill">
+        <xsl:text expand-text="true">&#xA; { ancestor-or-self::c:*/'  ' }{ local-name() }</xsl:text>
+        <xsl:apply-templates mode="#current"/>
+    </xsl:template>
+    
+    <xsl:variable name="go" xmlns="http://github.com/wendellpiez/XSLTug/configuration"
         xmlns:t="http://github.com/wendellpiez/XSLTug">
         <t:tug>
             <help>
                 <xsl:text> XSLTug running in </xsl:text>
                 <xsl:value-of select="$request/*/processor"/>
-                <xsl:text>&#xA; for more help see readme ... &#xA;</xsl:text>
+                <xsl:text>&#xA; for more help see readme ... &#xA;&#xA;&#xA;Current configuration:</xsl:text>
+                <t:trace/>
             </help>
             <request>
                 <xsl:copy-of select="$request"/>
@@ -286,7 +294,7 @@
             </test>
 
             <XSweet>
-                <test/>
+                <test><xsl:text>XSweet test successful&#xA;</xsl:text></test>
                 <docx-extract>
                     <file href="*.html">
                         <t:make-file method="html" href="file-href">
@@ -298,6 +306,11 @@
                                         </file>
                                     </t:source>
                                     <t:sequence>
+                                        <t:transform>docx-html-extract.xsl</t:transform>
+                                        <t:transform>handle-notes.xsl</t:transform>
+                                        <t:transform>scrub.xsl</t:transform>
+                                        <t:transform>join-elements.xsl</t:transform>
+                                        <t:transform>collapse-paragraphs.xsl</t:transform>
                                         <!-- xsweet sequence -->
                                     </t:sequence>
                                 </t:apply-sequence>
@@ -309,4 +322,57 @@
             </XSweet>
         </t:tug>
     </xsl:variable>
+    
+    <!--
+        
+        <t:apply-sequence>
+        <t:source>
+            <file href="*.xml">
+                <t:file href="file-href"/>
+            </file>
+        </t:source>
+        <t:sequence>
+            <t:transform> ... </t:transform>
+            
+        </t:sequence>
+    </t:apply-sequence>
+
+    
+    <t:apply-transform>
+        <t:source>
+            <file href="*.xml">
+                <t:file href="file-href"/>
+            <with>
+                <t:stylesheet>
+              <file href="*.xsl">
+                <t:file href="file-href">
+                <set>
+                <paramvalue>
+                <to>
+                  <t:with-param>
+                <t:any/>
+                </t:with-param>
+                </to></paramvalue></set>
+                </with>
+
+            </file>
+        </t:source>
+
+</t:apply-transform>-->
+    <!--<xsl:variable name="dummy-sequence">
+        <sequence>
+            <transform>transform-1.xsl</transform>
+            <transform>transform-2.xsl</transform>
+        </sequence>
+    </xsl:variable>
+    
+    <xsl:variable name="xsweet-sequence">
+        <sequence>
+            <transform>docx-html-extract.xsl</transform>
+            <transform>handle-notes.xsl</transform>
+            <transform>scrub.xsl</transform>
+            <transform>join-elements.xsl</transform>
+            <transform>collapse-paragraphs.xsl</transform>
+        </sequence>
+    </xsl:variable>--> 
 </xsl:stylesheet>
