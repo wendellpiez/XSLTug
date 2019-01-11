@@ -17,6 +17,7 @@
                 <title>XSLTug Document Synopsis: { document-uri(/) }</title>
             </head>
             <body>
+                <h1>XSLTug Document Synopsis: { document-uri(/) }</h1>
                <xsl:call-template name="synopsis"/> 
             </body>
         </html>
@@ -26,6 +27,9 @@
         <ul>
             <li>The document is parsed from { document-uri(/) }</li>
             <li>It contains { t:element-count(//*) }</li>
+            <li>The document element is '{ local-name(/*) }'{ if (matches(namespace-uri(/*),'\S')) then
+                (' in namespace ''' ||  namespace-uri(/*) || '''' )
+                else '' }</li>
         </ul>
     </xsl:template>
     

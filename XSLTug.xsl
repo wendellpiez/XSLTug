@@ -74,9 +74,14 @@
     
     <xsl:mode name="processtree" on-no-match="shallow-copy"/>
     
+    <xsl:function name="t:resolved-path">
+        <xsl:param name="path"/>
+        <xsl:value-of select="resolve-uri($path,$request/request/base_dir)"/>
+    </xsl:function>
+    
     <xsl:template mode="processtree" match="*[@v castable as xs:anyURI]
         [matches(@v,'\.[a-z]+$')]" priority="2">
-        <xsl:variable name="href" select="resolve-uri(@v,$request/request/base_dir)"/>
+        <xsl:variable name="href" select="t:resolved-path(@v)"/>
         <file href="{ $href }" xmlns="http://github.com/wendellpiez/XSLTug/configure">
             <xsl:if test="doc-available($href)">
             <xsl:for-each select="document($href)/*">
@@ -185,13 +190,21 @@
         <xsl:apply-templates select="$tracer"/>
     </xsl:template>
     
-    <xsl:template match="apply-sequence">
-       
+    <xsl:template match="apply-sequence[source]">
       <xsl:apply-templates select="sequence">
           <xsl:with-param name="source">
-              <xsl:apply-templates select="source"/>
+              <xsl:copy-of select="source/child::node()"/>
           </xsl:with-param>
       </xsl:apply-templates>
+    </xsl:template>
+    
+    <xsl:template match="apply-sequence[c:file]">
+        <xsl:variable name="arg-signature" select="t:signature(c:file)"/>
+        <xsl:variable name="arg" select="key('argument-by-signature',$arg-signature,$processtree)"/>
+        <!-- could have more robust exception trapping here -->
+        <xsl:apply-templates select="sequence">
+            <xsl:with-param name="source" select="document($arg/@href)"/>
+        </xsl:apply-templates>
     </xsl:template>
     
     <!--<xsl:template match="source">
@@ -350,11 +363,7 @@
                         <t:make-file method="html">
                             <from>
                                 <t:apply-sequence>
-                                    <t:source>
-                                        <file href="*.xml">
-                                            <t:acquire/>
-                                        </file>
-                                    </t:source>
+                                    <file href="*.xml"/>
                                     <t:sequence>
                                         <t:transform>docx-html-extract.xsl</t:transform>
                                         <t:transform>handle-notes.xsl</t:transform>
@@ -375,11 +384,7 @@
                 
 
                 <t:apply-sequence>
-                    <t:source>
-                        <file href="*.xml">
-                            <t:acquire/>
-                        </file>
-                    </t:source>
+                    <file href="*.xml"/>
                     <t:sequence>
                         <t:transform>xml-diagnostic.xsl</t:transform>
                         <t:make-markdown/>
