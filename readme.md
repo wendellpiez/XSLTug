@@ -12,6 +12,8 @@ If you deploy XSLT pipelines using shell scripts such as `bash` or Windows "batc
 
 If you deploy such pipelines to be used by team as "appliances", you might be particularly interested.
 
+Also note that while you might not need XSLTug if you have any of the technologies or capabilities described above, it might nonetheless work well inside or alongside them.
+
 # Why this approach?
 
 ## XSLT pipelines as black boxes
@@ -44,7 +46,7 @@ However, XSLTug could also be adjusted to work with any XSLT 3.0 processor that 
 
 ## Fun
 
-Schematron is fun because you get to write your own error messages. The fun of XSLTug is in designing a capable command syntax to accomplish chores without fuss.
+Schematron is fun because you get to write your own error messages. The fun of XSLTug is in designing a capable command syntax to accomplish chores without fuss -- and subsequently watching it disappear to do its job unnoticed.
 
 # To use:
 
@@ -95,3 +97,14 @@ Extending XSLTug is meant to be easy: build a command tree representing the synt
 Given such a configuration, the XSLTug transformation can match the commands a user gives at runtime to corresponding instructions in back.
 
 However, this feature set is also under development. To build your own configuration you will need expert assistance, until some non-obvious constraints, features and limitations are documented. Please ask the proprietor for guidance.
+
+### Architecture
+
+The main stylesheet is fired in an initial mode, "go", with a single string parameter, which is parsed and processed into a "process tree".
+
+The main execution works by processing a configuration tree, represented as an XML document. (Also called `$go`, it is given as a literal in the XSLT, but could also be placed or overridden from out of line.) This tree represents a complete map of everything this instance of XSLTug is able to do, its library of transformations. Within the map are declarations for all the information needed (such as names of inputs or processes or parameter values) to run the desired transformations and transformation sequences.
+
+Given this map, the process tree is then referenced as a pointer or pathway to the location where the appropriate pipeline is specified (for the given input). The pipeline takes the form of a model (representation) of transformation processes including designators (binding points) for input and output (result) file names, parameter values and runtime configurations such as serialization settings.
+
+Outputs may be reported directly to the console (in plain text or markdown) or written out to files, as indicated by application semantics (as pipeline production artifacts).
+
