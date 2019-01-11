@@ -124,4 +124,36 @@
     <xsl:text>* </xsl:text>
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
+  
+  <xsl:template match="tr[1]" mode="md">
+    <xsl:text xml:space="preserve">&#xA;</xsl:text>
+    <xsl:apply-templates mode="#current"/>
+    <xsl:text xml:space="preserve">&#xA;</xsl:text>
+    <xsl:for-each select="td | th"><xsl:text xml:space="preserve">| </xsl:text>
+      <xsl:for-each select="1 to string-length(.)">-</xsl:for-each>
+      <xsl:text xml:space="preserve"> </xsl:text>
+    </xsl:for-each>
+    <xsl:text xml:space="preserve">|</xsl:text>
+    
+  </xsl:template>
+  
+  <xsl:template match="tr" mode="md">
+    <xsl:text xml:space="preserve">&#xA;</xsl:text>
+    
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  
+  
+  <xsl:template match="td | th" mode="md">
+    <xsl:text xml:space="preserve">| </xsl:text>
+    <xsl:apply-templates mode="#current"/>
+    <xsl:text xml:space="preserve"> </xsl:text>
+    <xsl:if test="empty(following-sibling::*)" xml:space="preserve">| </xsl:if>
+    
+  </xsl:template>
+  
+  
+  
+  
 </xsl:stylesheet>

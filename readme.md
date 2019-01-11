@@ -20,17 +20,29 @@ While it is useful to be able to write XSLT, it is also useful to be able to run
 
 ## Extensibility / Learnability
 
-While lightweight, this is meant to be very flexible and extensible. Also, because it will be set down and taken up at inconsistent intervals, it must be learnable and traceable.
+While lightweight, this is meant to be very flexible and extensible. Also, because it will be set down and taken up at inconsistent intervals, it must be learnable and traceable, to both users and developers.
+
+For users, this goal is to be achieved by presenting very simple interfaces, factoring out as many system complexities as possible to achieve process results without respect to means. The complexities must not be hidden from developers, however; instead, interfaces must be presented to enable developers to manage these complexities for the user by means of smart design.
 
 ## Security
 
-Everything is encapsulated in a single runtime call. While XSLTug may write files to the system (as designed), it won't create artifacts and doesn't depend on network or server.
+Everything is encapsulated in a single runtime call. While XSLTug may write files to the system (as designed), it won't create temporary artifacts or system scat, and it doesn't depend on network or server.
 
 ## Limitations
 
 Without support (for example) for EXSLT, we can't quite provide full services over the directory structure.
 
 This means that some kinds of batch processing aren't readily provided for. Expect things to work best one-to-one or one-to-many.
+
+## Dependencies
+
+One of the requirements is to be lightweight (and secure) so the only dependency is Saxon.
+
+However, XSLTug could also be adjusted to work with any XSLT 3.0 processor that supports the XPath 3.1 function library. Please make inquiries if you have a processor other than Saxon, and you wish to road-test this useful meta-application.
+
+## Fun
+
+Schematron is fun because you get to write your own error messages. The fun of XSLTug is in designing a capable command syntax to accomplish chores without fuss.
 
 # To use:
 
@@ -50,12 +62,34 @@ Or on Windows you can also run Saxon under .NET (see their docs)
 
 ### Environment
 
-Edit the scripts to replace the developer's paths with your own.
+Edit the scripts to replace the developer's paths with your own. Ensure the scripts in the distribution (`.sh` or `.bat` as appropriate) have permissions to run (`chmod 755 tug.sh` or equivalent).
+
+(TBD)
 
 ### Command syntax
  
-`./tug.sh` or just (if aliased) `tug`
+In bash, `./tug.sh` or just (if aliased) `tug`
 
-`tug -help` gives basic help, including the configured command tree
-`tug test` invoked a simple pipeline to test whether pipelining transformations works properly
+An analogous Windows command (`tug.bat`) is also under development.
 
+The following examples assume an alias. Expand `tug` to `./tug.sh` as needed.
+
+`tug help` gives basic help, including the configured command tree, including other commands it is set up to recognize (including...)
+
+`tug test` invokes a simple pipeline to test whether pipelining transformations works properly
+
+`tug mockup x y z` writes a command tree suitable for inclusion in a configuration - use this to get started on making your own syntax.
+
+`tug mockup x y z` writes a command tree suitable for inclusion in a configuration - use this to get started on making your own syntax. (So for example you might type `tug mockup makemyfile file.html from file.xml` to see what a configuration for that particular tree will look like.
+
+`tug mockup x y z` writes a command tree suitable for inclusion in a configuration - use this to get started on making your own syntax. (So for example you might type `tug mockup makemyfile file.html from file.xml` to see 
+
+`tug inspect {file.xml}` reports information about an XML file resource
+
+### Extending
+
+Extending XSLTug is meant to be easy: build a command tree representing the syntax to be supported, in which the expected operations are described and binding points are provided for any properties to be declared dynamically (such as file names and parameter values). (Currently the configuration is kept in the main XSLT but it could be moved out of line.)
+
+Given such a configuration, the XSLTug transformation can match the commands a user gives at runtime to corresponding instructions in back.
+
+However, this feature set is also under development. To build your own configuration you will need expert assistance, until some non-obvious constraints, features and limitations are documented. Please ask the proprietor for guidance.

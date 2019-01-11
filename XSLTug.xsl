@@ -175,7 +175,7 @@
        
 <!-- Top level element of an argument configuration -->
     <xsl:template match="/tug[not(c:*/local-name() = $processtree/c:*/local-name())]">
-        <xsl:text expand-text="true">&#xA;XSLTug WARNING: No configuration for '{ $processtree/*/local-name() }'</xsl:text>
+        <xsl:text expand-text="true">&#xA;XSLTug WARNING: No configuration for '{ $processtree/*/(@v,local-name())[1] }'</xsl:text>
         <xsl:call-template name="trace-configuration"/>
     </xsl:template>
     
@@ -283,13 +283,6 @@
         <xsl:sequence select="$sourcedoc"/>
     </xsl:template>
     
-    <xsl:template mode="echo" match="*">
-        <xsl:element name="{local-name()}">
-            <xsl:copy-of select="@*"/>
-            <xsl:apply-templates mode="#current"/>
-        </xsl:element>
-    </xsl:template>
-    
     <xsl:template match="xsl:* | text()" mode="spill"/>
     
     <xsl:template match="t:*" mode="spill">
@@ -380,9 +373,6 @@
                 </docx-extract>
             </XSweet>
             <inspect>
-
-                
-
                 <t:apply-sequence>
                     <file href="*.xml"/>
                     <t:sequence>
@@ -392,28 +382,25 @@
                 </t:apply-sequence>
             </inspect>
             
-            <produce>
-                <file href="*.html">
-                    <t:make-file>
+            <make-with-xslt>
+                <t:make-file>
+                    <file href="*.*">
                         <from>
-                            <t:dynamic-transform>
-                                <t:source>
-                                    <file href="*.xml">
-                                        <t:acquire/>
-                                        <using>
-                                            <t:stylesheet>
-                                                <file href="*.xsl">
-                                                  <t:acquire/>
-                                                </file>
-                                            </t:stylesheet>
-                                        </using>
-                                    </file>
-                                </t:source>
-                            </t:dynamic-transform>
+                            <t:apply-transform>
+                                <file href="*.xml">
+                                    <with>
+                                        <xslt>
+                                            <t:transform>
+                                                <file href="*.xsl"/>
+                                            </t:transform>
+                                        </xslt>
+                                    </with>
+                                </file>
+                            </t:apply-transform>
                         </from>
-                    </t:make-file>
-                </file>
-            </produce>            
+                    </file>
+                </t:make-file>
+            </make-with-xslt>            
         </t:tug>
     </xsl:variable>
     
