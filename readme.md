@@ -1,6 +1,6 @@
 # XSLTug
 
-A command-line shell for orchestrating XSLT transformation pipelines.
+A Meta-transformer. Supports running libraries of XSLT transformation pipelines using localized, home-made command line syntaxes.
 
 # Who is it for (XSLT developers)
 
@@ -12,7 +12,7 @@ If you deploy XSLT pipelines using shell scripts such as `bash` or Windows "batc
 
 If you deploy such pipelines to be used by team as "appliances", you might be particularly interested.
 
-Also note that while you might not need XSLTug if you have any of the technologies or capabilities described above, it might nonetheless work well inside or alongside them.
+Also note that while you might not need XSLTug if you have any of the technologies or capabilities described above (or others, such as IDEs or online services), it might nonetheless work well inside or alongside them.
 
 # Why this approach?
 
@@ -53,9 +53,9 @@ Schematron is fun because you get to write your own error messages. The fun of X
 1. Acquire Saxon (any version since 9.9)
 1. Set up your environment, \*nix or Windows
 1. Use the command syntax given to invoke XSLT transformations and pipelines
-1. Extend the command syntax with your own mapping configurations (in XML)
+1. Extend the command syntax with your own mapping configurations (in XML) to support your own processes
 
-### Acquire Saxon
+## Acquire Saxon
 
 Saxon is the industry-leading XSLT 3.0 processor.
 
@@ -64,13 +64,13 @@ With Java installed, you can use Saxon with a path to its `jar` file.
 Or on Windows you can also run Saxon under .NET (see their docs)
 
 
-### Environment
+## Environment
 
 Edit the scripts to replace the developer's paths with your own. Ensure the scripts in the distribution (`.sh` or `.bat` as appropriate) have permissions to run (`chmod 755 tug.sh` or equivalent).
 
 (TBD)
 
-### Command syntax
+## Command syntax
  
 In bash, `./tug.sh` or just (if aliased) `tug`
 
@@ -82,29 +82,30 @@ The following examples assume an alias. Expand `tug` to `./tug.sh` as needed.
 
 `tug test` invokes a simple pipeline to test whether pipelining transformations works properly
 
-`tug mockup x y z` writes a command tree suitable for inclusion in a configuration - use this to get started on making your own syntax.
+`tug mockup foo bar baz` writes a command tree suitable for inclusion in a configuration - use this to get started on making your own syntax (in this case showing the tree for `foo bar baz`).
 
-`tug mockup x y z` writes a command tree suitable for inclusion in a configuration - use this to get started on making your own syntax. (So for example you might type `tug mockup makemyfile file.html from file.xml` to see what a configuration for that particular tree will look like.
-
-`tug mockup x y z` writes a command tree suitable for inclusion in a configuration - use this to get started on making your own syntax. (So for example you might type `tug mockup makemyfile file.html from file.xml` to see 
+So for example you might type `tug mockup makemyfile file.html from file.xml` to see what a configuration for that particular tree will look like. XSLTug is extended by annotating this representation with the instruction set for applicable transformations and processes.
 
 `tug inspect {file.xml}` reports information about an XML file resource
 
-### Extending
+It uses the `xml-analysis.xsl` stylesheet, which has just been started (at time of writing), so it doesn't give much in the way of results.
+
+## Extending
 
 Extending XSLTug is meant to be easy: build a command tree representing the syntax to be supported, in which the expected operations are described and binding points are provided for any properties to be declared dynamically (such as file names and parameter values). (Currently the configuration is kept in the main XSLT but it could be moved out of line.)
 
 Given such a configuration, the XSLTug transformation can match the commands a user gives at runtime to corresponding instructions in back.
 
-However, this feature set is also under development. To build your own configuration you will need expert assistance, until some non-obvious constraints, features and limitations are documented. Please ask the proprietor for guidance.
+However, this feature set is also under development. To build your own configuration you will need expert assistance, until some non-obvious constraints, features and limitations are documented. If you wish to do this please ask the proprietor for guidance.
 
-### Architecture
+# Architecture
 
-The main stylesheet is fired in an initial mode, "go", with a single string parameter, which is parsed and processed into a "process tree".
+The main stylesheet is fired in an initial mode, `go`, with a single string parameter, which is parsed and processed into an XML data element  `$processtree`.
 
-The main execution works by processing a configuration tree, represented as an XML document. (Also called `$go`, it is given as a literal in the XSLT, but could also be placed or overridden from out of line.) This tree represents a complete map of everything this instance of XSLTug is able to do, its library of transformations. Within the map are declarations for all the information needed (such as names of inputs or processes or parameter values) to run the desired transformations and transformation sequences.
+The main execution works by processing a configuration tree, represented as an XML document. (As variable `$go`, it is given as a literal in the XSLT, but it could also be provided from out of line.) This tree represents a complete map of everything this instance of XSLTug is able to do, its library of transformations. Within the map are declarations for all the information needed (such as names of inputs or processes or parameter values) to run the desired transformations and transformation sequences.
 
-Given this map, the process tree is then referenced as a pointer or pathway to the location where the appropriate pipeline is specified (for the given input). The pipeline takes the form of a model (representation) of transformation processes including designators (binding points) for input and output (result) file names, parameter values and runtime configurations such as serialization settings.
+Given this map, `$processtree` is then referenced as a pointer or pathway to the location where the appropriate pipeline is specified. In the configuration tree the pipeline takes the form of a model (representation) of transformation processes including designators (binding points) for input and output (result) file names, parameter values and runtime configurations such as serialization settings. By locating the analogous data items in the process tree, the configuration for any process can accept bindings or settings from any `$processtree` actually given.
 
 Outputs may be reported directly to the console (in plain text or markdown) or written out to files, as indicated by application semantics (as pipeline production artifacts).
 
+Replacing the configuration tree replaces the entire functionality of the toolkit.
