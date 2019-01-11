@@ -34,6 +34,8 @@ Without support (for example) for EXSLT, we can't quite provide full services ov
 
 This means that some kinds of batch processing aren't readily provided for. Expect things to work best one-to-one or one-to-many.
 
+Otherwise, the only limitations are in what can be done with XSLT given the available computing power. This being said, no warranty can be offered or implied for any application of this code or code that it invokes.
+
 ## Dependencies
 
 One of the requirements is to be lightweight (and secure) so the only dependency is Saxon.
