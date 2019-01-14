@@ -166,7 +166,7 @@
                 <xsl:for-each select="$invocation">
                     <xsl:if test="exists(*) and
                         not(*/local-name() = $config//c:*/local-name() )">
-                        <xsl:text expand-text="true">&#xA;XSLTug WARNING: Not finding pattern for '{ */ancestor-or-self::*/name() }'&#xA;&#x200b;</xsl:text>
+                        <xsl:text expand-text="true">&#xA;XSLTug WARNING: Not finding pattern for '{ */ancestor-or-self::*/name() }'&#xA;</xsl:text>
                         <xsl:call-template name="trace-configuration"/>
                     </xsl:if>
                 </xsl:for-each>
@@ -187,6 +187,7 @@
         <xsl:variable as="element()" name="tracer">
             <t:trace/>
         </xsl:variable>
+        <xsl:text>&#xA;Current configuration (argument tree):</xsl:text>
         <xsl:apply-templates select="$tracer"/>
     </xsl:template>
     
@@ -315,10 +316,10 @@
         xmlns:t="http://github.com/wendellpiez/XSLTug">
         <t:tug>
             <help>
-                <xsl:text> XSLTug running in </xsl:text>
+                <xsl:text>XSLTug running in </xsl:text>
                 <xsl:value-of select="$request/*/processor"/>
-                <xsl:text>&#xA; for more help see readme ... &#xA;&#xA;</xsl:text>
-                <xsl:text>&#xA;Current configuration:</xsl:text>
+                <xsl:text>&#xA;  for more help see readme ...</xsl:text>
+                <xsl:text>&#xA;Current configuration (command tree):</xsl:text>
                 <t:trace/>
             </help>
             <show>

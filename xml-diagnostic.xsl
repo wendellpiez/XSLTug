@@ -27,15 +27,11 @@
         <ul>
             <li>The document is parsed from { document-uri(/) }</li>
             <li>It contains { t:element-count(//*) }</li>
-            <li>The document element is '{ local-name(/*) }'{ if (matches(namespace-uri(/*),'\S')) then
+            <li>The document element is '{ name(/*) }'{ if (matches(namespace-uri(/*),'\S')) then
                 (' in namespace ''' ||  namespace-uri(/*) || '''' )
                 else '' }</li>
         </ul>
-        <table>
-            <tr>
-                <th>Markdown</th><th>table</th><th>support</th></tr>
-            <tr><td>1</td><td>2</td><td>3</td></tr>
-        </table>
+        
     </xsl:template>
     
     <xsl:function name="t:element-count" as="xs:string">
